@@ -1,0 +1,7 @@
+/		250M
+swap		80M
+/tmp		512M
+/usr		1.5G
+/usr/local	2G
+/home		1G-10G	5%
+/var		4G-*	95%

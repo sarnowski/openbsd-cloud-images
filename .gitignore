@@ -1,0 +1,11 @@
+# build artifacts
+/mirror
+/target
+
+# Vagrant artifacts
+/.vagrant
+*.log
+
+# editors
+*.swp
+/.idea
