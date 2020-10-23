@@ -1,0 +1,35 @@
+name: Cloud-Images
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build Image
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        profile:
+          - 6.8/minimal
+          - 6.8/default
+          - 6.8/full
+        provider:
+          - qemu/default
+          - azure/default
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install host tools
+        run: sudo scripts/host-setup.sh
+
+      - name: Make image
+        run: make PROFILE=${{ matrix.profile }} PROVIDER=${{ matrix.provider }}
+        timeout-minutes: 30

@@ -2,3 +2,4 @@
 rc.firsttime	0:0	0700	/etc/rc.firsttime
 rc.secondtime	0:0	0700	/etc/rc.secondtime
 installurl	0:0	0644	/etc/installurl
+hostname.hvn0	0:0	0600	/etc/hostname.hvn0

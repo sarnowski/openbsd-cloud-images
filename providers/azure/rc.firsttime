@@ -1,0 +1,57 @@
+PATH=$PATH:/usr/local/sbin:/usr/local/bin
+
+#
+# basic system hygiene
+#
+
+echo "disabling sndiod"
+rcctl disable sndiod
+
+echo "applying all available patches"
+syspatch
+
+echo "installing matching firmware"
+fw_update -v
+
+
+#
+# Azure Linux Agent
+# cloud-init, network & disk management, access management, ...
+#
+# https://docs.microsoft.com/en-us/azure/virtual-machines/linux/create-upload-openbsd
+#
+
+WAAGENT_VERSION="2.2.49.2"
+PYTHON_VERSION="2.7.18p0"
+SETUPTOOLS_VERSION="41.6.0p0v0"
+OPENSSL_VERSION="1.1.1h"
+
+echo "installing Azure agent $WAAGENT_VERSION"
+
+# install prerequisites
+pkg_add -v -I -x \
+	python-$PYTHON_VERSION \
+	py-setuptools-$SETUPTOOLS_VERSION \
+	openssl-$OPENSSL_VERSION
+
+# default python (unfortuantely still 2, thanks MS)
+ln -sf /usr/local/bin/python2.7 /usr/local/bin/python
+ln -sf /usr/local/bin/python2.7-2to3 /usr/local/bin/2to3
+ln -sf /usr/local/bin/python2.7-config /usr/local/bin/python-config
+ln -sf /usr/local/bin/pydoc2.7  /usr/local/bin/pydoc
+
+# install agent
+ftp -o /tmp/WALinuxAgent-$WAAGENT_VERSION.tar.gz https://github.com/Azure/WALinuxAgent/archive/v${WAAGENT_VERSION}.tar.gz
+cd /tmp; tar xfz WALinuxAgent-$WAAGENT_VERSION.tar.gz
+cd WALinuxAgent-$WAAGENT_VERSION; python setup.py install
+cd /; rm -rf /tmp/WALinuxAgent*
+
+echo "cleanup temporary packages"
+pkg_delete -v -I -x -c py-setuptools
+pkg_delete -v -I -x -c -a
+
+echo "preparing next boot"
+mv -v /etc/rc.secondtime /etc/rc.firsttime
+
+echo "installation finished; rebooting into real system"
+reboot

@@ -7,13 +7,13 @@ syspatch
 echo "installing matching firmware"
 fw_update -v
 
-echo "relinking kernel to use unique KARL for this server"
-/usr/libexec/reorder_kernel
-
 echo "setting 'root' password to 'openbsd'!"
 password=$(encrypt -b a "openbsd")
 sed -i -e "s@^root:\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*:@root:${password}:@" /etc/master.passwd
 pwd_mkdb -s -u root /etc/master.passwd
 
-echo "rebooting into patched system"
+echo "preparing next boot"
+mv -v /etc/rc.secondtime /etc/rc.firsttime
+
+echo "installation finished; rebooting into real system"
 reboot

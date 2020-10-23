@@ -2,6 +2,9 @@
 /mirror
 /target
 
+# some local env scripts for publishing
+/*-env.sh
+
 # Vagrant artifacts
 /.vagrant
 *.log
