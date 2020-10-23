@@ -88,7 +88,8 @@ default: ${FINAL_DISK}
 
 ${MIRROR_FILES}:
 	@mkdir -p ${MIRROR_DIR}; \
-	wget -O $@ ${MIRROR}/${PROFILE_VERSION}/${ARCH}/$(shell basename $@) || exit 1; \
+	echo "Downloading ${MIRROR}/${PROFILE_VERSION}/${ARCH}/$(shell basename $@) ..."; \
+	wget --no-verbose -O $@ ${MIRROR}/${PROFILE_VERSION}/${ARCH}/$(shell basename $@) || exit 1; \
 	cd ${MIRROR_DIR}; \
 	signify-openbsd -C -p ../../${PROFILE_VERSION_DIR}/openbsd-${PROFILE_VERSION_SHORT}-base.pub -x ../../${PROFILE_VERSION_DIR}/SHA256.sig $(shell basename $@); \
 	if [ $$? -ne 0 ]; then \

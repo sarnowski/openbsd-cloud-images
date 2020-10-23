@@ -15,13 +15,13 @@ jobs:
 
     strategy:
       matrix:
+        provider:
+          - qemu/default
+          - azure/default
         profile:
           - 6.8/minimal
           - 6.8/default
           - 6.8/full
-        provider:
-          - qemu/default
-          - azure/default
 
     steps:
       - name: Checkout code
@@ -33,3 +33,10 @@ jobs:
       - name: Make image
         run: make PROFILE=${{ matrix.profile }} PROVIDER=${{ matrix.provider }}
         timeout-minutes: 30
+
+      - name: Store artifact
+        uses: 'actions/upload-artifact@v2'
+        with:
+          name: openbsd-${{ matrix.profile }}-${{ matrix.provider }}
+          path: target/dev/${{ matrix.provider }}/${{ matrix.profile }}/openbsd.*
+          if-no-files-found: error
