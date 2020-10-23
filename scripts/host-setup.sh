@@ -16,12 +16,15 @@ echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO 
 
 # update packages
 apt-get update
-apt-get -o Dpkg::Options::=--force-confnew --allow-downgrades --allow-remove-essential --allow-change-held-packages -fuy dist-upgrade
-apt-get -o Dpkg::Options::=--force-confnew --allow-downgrades --allow-remove-essential --allow-change-held-packages -fuy autoremove
 
-# set time correctly
-apt-get -o Dpkg::Options::=--force-confnew --allow-downgrades --allow-remove-essential --allow-change-held-packages -fuy install ntpdate
-ntpdate pool.ntp.org
+if [ -d /vagrant ]; then
+	apt-get -o Dpkg::Options::=--force-confnew --allow-downgrades --allow-remove-essential --allow-change-held-packages -fuy dist-upgrade
+	apt-get -o Dpkg::Options::=--force-confnew --allow-downgrades --allow-remove-essential --allow-change-held-packages -fuy autoremove
+
+	# set time correctly
+	apt-get -o Dpkg::Options::=--force-confnew --allow-downgrades --allow-remove-essential --allow-change-held-packages -fuy install ntpdate
+	ntpdate pool.ntp.org
+fi
 
 # install required packages
 apt-get -o Dpkg::Options::=--force-confnew --allow-downgrades --allow-remove-essential --allow-change-held-packages -fuy install \
