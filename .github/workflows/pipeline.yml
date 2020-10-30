@@ -33,6 +33,12 @@ jobs:
           path: mirror
           key: mirror
 
+      - name: Sync mirror files
+        run: make mirror-sync
+
+      - name: Check mirror files
+        run: make mirror-check
+
       - name: Install host tools
         run: sudo scripts/host-setup.sh
 

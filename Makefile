@@ -61,8 +61,18 @@ DOWNLOAD_FILES += bsd
 DOWNLOAD_FILES += bsd.rd
 DOWNLOAD_FILES += bsd.mp
 DOWNLOAD_FILES += pxeboot
-
 MIRROR_FILES := ${MIRROR_DIR}/$(shell echo "${DOWNLOAD_FILES}" | sed 'sX X ${MIRROR_DIR}/Xg')
+
+ALL_FILES := bsd bsd.rd bsd.mp pxeboot
+ALL_FILES += base${PROFILE_VERSION_SHORT}.tgz
+ALL_FILES += comp${PROFILE_VERSION_SHORT}.tgz
+ALL_FILES += game${PROFILE_VERSION_SHORT}.tgz
+ALL_FILES += man${PROFILE_VERSION_SHORT}.tgz
+ALL_FILES += xbase${PROFILE_VERSION_SHORT}.tgz
+ALL_FILES += xfont${PROFILE_VERSION_SHORT}.tgz
+ALL_FILES += xserv${PROFILE_VERSION_SHORT}.tgz
+ALL_FILES += xshare${PROFILE_VERSION_SHORT}.tgz
+ALL_MIRROR_FILES := ${MIRROR_DIR}/$(shell echo "${ALL_FILES}" | sed 'sX X ${MIRROR_DIR}/Xg')
 
 VERSION_FILES := SHA256 SHA256.sig
 
@@ -82,12 +92,11 @@ PXEBOOT_FILES := ${PXE_VERSION_FILES} \
 .PHONY: default
 default: ${FINAL_DISK}
 
-
 #
 # Prepare /mirror diretory
 #
 
-${MIRROR_FILES}:
+${ALL_MIRROR_FILES}:
 	@mkdir -p ${MIRROR_DIR}; \
 	echo "Downloading ${MIRROR}/${PROFILE_VERSION}/${ARCH}/$(shell basename $@) ..."; \
 	wget --no-verbose -O $@ ${MIRROR}/${PROFILE_VERSION}/${ARCH}/$(shell basename $@) || exit 1; \
@@ -98,6 +107,14 @@ ${MIRROR_FILES}:
 		exit 1; \
 	fi
 
+
+.PHONY: mirror-sync
+mirror-sync: ${ALL_MIRROR_FILES}
+
+.PHONEY: mirror-check
+mirror-check: ${ALL_MIRROR_FILES}
+	@cd ${MIRROR_DIR}; \
+	signify-openbsd -C -p ../../${PROFILE_VERSION_DIR}/openbsd-${PROFILE_VERSION_SHORT}-base.pub -x ../../${PROFILE_VERSION_DIR}/SHA256.sig ${DOWNLOAD_FILES}
 
 #
 # Prepare PXEBOOT
