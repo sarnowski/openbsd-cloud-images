@@ -29,7 +29,7 @@ jobs:
         uses: frabert/replace-string-action@v1.2
         with:
           pattern: '(.+)\/(.+)'
-          string: ${{ mirror.provider }}
+          string: ${{ matrix.provider }}
           replace-with: '${1}_${2}'
 
       - name: Safe profile string
@@ -37,7 +37,7 @@ jobs:
         uses: frabert/replace-string-action@v1.2
         with:
           pattern: '(.+)\/(.+)'
-          string: ${{ mirror.profile }}
+          string: ${{ matrix.profile }}
           replace-with: '${1}_${2}'
 
       - name: Checkout code
