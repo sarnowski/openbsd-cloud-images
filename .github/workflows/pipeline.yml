@@ -24,8 +24,22 @@ jobs:
           - 6.8/full
 
     steps:
+      - name: Safe strings
+        run: |
+          echo "::set-env name=safe_provider::$(echo $unsafe_provider | sed 'sX/X_Xg')"
+          echo "::set-env name=safe_profile::$(echo $unsafe_profile | sed 'sX/X_Xg')"
+        with:
+          unsafe_provider: ${{ matrix.provider }}
+          unsafe_profile: ${{ matrix.profile }}
+
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Cache mirror
+        uses: actions/cache@v2
+        with:
+          path: mirror
+          key: mirror-${{ safe_profile }}
 
       - name: Install host tools
         run: sudo scripts/host-setup.sh
@@ -37,6 +51,6 @@ jobs:
       - name: Store artifact
         uses: 'actions/upload-artifact@v2'
         with:
-          name: openbsd-${{ matrix.profile }}-${{ matrix.provider }}
+          name: openbsd-${{ safe_profile }}-${{ safe_provider }}
           path: target/dev/${{ matrix.provider }}/${{ matrix.profile }}/openbsd.*
           if-no-files-found: error
