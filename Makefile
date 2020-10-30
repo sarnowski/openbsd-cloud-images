@@ -182,7 +182,7 @@ publish-init:
 	@${PROVIDER_NAME_DIR}/publish-init.sh ${PROVIDER_VARIANT}
 
 .PHONY: publish
-publish:
+publish: ${FINAL_DISK}
 	@${PROVIDER_NAME_DIR}/publish.sh ${PROVIDER_VARIANT} ${PROFILE} ${FINAL_DISK}
 
 
