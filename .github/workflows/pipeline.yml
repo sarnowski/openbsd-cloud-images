@@ -24,22 +24,6 @@ jobs:
           - 6.8/full
 
     steps:
-      - name: Safe provider string
-        id: provider
-        uses: frabert/replace-string-action@v1.2
-        with:
-          pattern: '(.+)\/(.+)'
-          string: ${{ matrix.provider }}
-          replace-with: '${1}_${2}'
-
-      - name: Safe profile string
-        id: profile
-        uses: frabert/replace-string-action@v1.2
-        with:
-          pattern: '(.+)\/(.+)'
-          string: ${{ matrix.profile }}
-          replace-with: '${1}_${2}'
-
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -47,7 +31,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: mirror
-          key: mirror-${{ steps.profile.outputs.result }}
+          key: mirror
 
       - name: Install host tools
         run: sudo scripts/host-setup.sh

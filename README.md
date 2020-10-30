@@ -1,8 +1,15 @@
 # OpenBSD Cloud Images
 
+![OpenBSD Cloud Images Status](https://github.com/sarnowski/openbsd-cloud-images/workflows/Cloud-Images/badge.svg?branch=main)
+
 This repository contains a build system to create OpenBSD cloud images on Linux machines.
 Most automated build systems provide great support for Linux but mostly not for OpenBSD.
 Until this changes, the build framework will focus on Linux to allow everyone to automatically build OpenBSD images for their servers.
+
+The following providers are supported:
+
+  * azure
+  * qemu / kvm
 
 ## Local Build Environment
 

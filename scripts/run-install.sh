@@ -111,12 +111,12 @@ fi
 
 if [ $WEBFSD_STARTED = true ]; then
 	echo "=> Stopping webfsd (HTTP)..."
-	sudo kill -9 $(cat $PWD/webfsd.pid)
+	sudo kill -9 $(sudo cat $PWD/webfsd.pid)
 fi
 
 if [ $DNSMASQ_STARTED = true ]; then
 	echo "=> Stopping dnsmasq (DNS, DHCP, TFTP)..."
-	sudo kill -9 $(cat $PWD/dnsmasq.pid)
+	sudo kill -9 $(sudo cat $PWD/dnsmasq.pid)
 fi
 
 if [ $GUEST_IF_CREATED = true ]; then
