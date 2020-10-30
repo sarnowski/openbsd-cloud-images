@@ -1,4 +1,4 @@
 -		0:0	0755	/etc
-../rc.installation	0:0	0700	/etc/rc.installation
-../rc.provision	0:0	0700	/etc/rc.provision
+rc.installation	0:0	0700	/etc/rc.installation
+rc.provision	0:0	0700	/etc/rc.provision
 ../hostname.hvn0	0:0	0600	/etc/hostname.hvn0

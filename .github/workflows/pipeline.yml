@@ -16,9 +16,10 @@ jobs:
     strategy:
       matrix:
         provider:
-          - qemu/dev
           - qemu/default
+          - qemu/dev
           - azure/default
+          - azure/minimal
         profile:
           - 6.8/minimal
           - 6.8/default
