@@ -1,20 +1,6 @@
 PATH=$PATH:/usr/local/sbin:/usr/local/bin
 
 #
-# basic system hygiene
-#
-
-echo "disabling sndiod"
-rcctl disable sndiod
-
-echo "applying all available patches"
-syspatch
-
-echo "installing matching firmware"
-fw_update -v
-
-
-#
 # Azure Linux Agent
 # cloud-init, network & disk management, access management, ...
 #
@@ -49,17 +35,3 @@ cd /; rm -rf /tmp/WALinuxAgent*
 echo "cleanup temporary packages"
 pkg_delete -v -I -x -c py-setuptools
 pkg_delete -v -I -x -c -a
-
-echo "preparing next boot"
-mv -v /etc/rc.secondtime /etc/rc.firsttime
-
-echo "cleanup generated instance keys"
-rm -vf /etc/ssh/ssh_host_*_key{,.pub}
-rm -vf /etc/isakmpd/private/local.key
-rm -vf /etc/isakmpd/local.pub
-rm -vf /etc/iked/private/local.key
-rm -vf /etc/iked/local.pub
-rm -vf /etc/soii.key
-
-echo "installation finished; rebooting into real system"
-reboot

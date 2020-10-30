@@ -1,0 +1,7 @@
+PATH=$PATH:/usr/local/sbin:/usr/local/bin
+
+echo "registering Azure agent"
+waagent -register-service
+
+echo "prune system for final boot"
+waagent -deprovision -force

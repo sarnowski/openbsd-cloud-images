@@ -6,11 +6,12 @@
 #
 # Arguments, override as necessary
 #
-PROVIDER ?= qemu/default
-PROFILE ?= 6.8/default
+PROVIDER ?= qemu/dev
+PROFILE ?= 6.8/minimal
 MIRROR ?= https://cdn.openbsd.org/pub/OpenBSD/
 DISKSIZE ?= 10
 BUILD_ID ?= dev
+CUSTOMIZATION ?=
 
 #
 # internal variables
@@ -131,7 +132,7 @@ ${PXEROOT}/DISKLABEL: ${PROFILE_VARIANT_DIR}/DISKLABEL
 
 
 ${SITE_TARBALL}:
-	@scripts/build-site.sh ${SITE_TARBALL} ${PROVIDER} ${PROFILE}
+	@scripts/build-site.sh ${SITE_TARBALL} ${PROVIDER} ${PROFILE} ${CUSTOMIZATION}
 
 
 #

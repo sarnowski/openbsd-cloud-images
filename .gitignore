@@ -1,3 +1,6 @@
+# customized overlay
+/customization
+
 # build artifacts
 /mirror
 /target

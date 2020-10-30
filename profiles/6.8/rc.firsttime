@@ -1,3 +1,5 @@
+echo "running cloud image installation"
+
 echo "disabling sndiod"
 rcctl disable sndiod
 
@@ -7,13 +9,14 @@ syspatch
 echo "installing matching firmware"
 fw_update -v
 
-echo "setting 'root' password to 'openbsd'!"
-password=$(encrypt -b a "openbsd")
-sed -i -e "s@^root:\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*:@root:${password}:@" /etc/master.passwd
-pwd_mkdb -s -u root /etc/master.passwd
+if [ -f /etc/rc.installation ]; then
+	echo "running custom installation script"
+	sh /etc/rc.installation || exit $?
+	rm /etc/rc.installation
+fi
 
-echo "preparing next boot"
-mv -v /etc/rc.secondtime /etc/rc.firsttime
+echo "enabling second stage rc"
+mv /etc/rc.secondtime /etc/rc.firsttime
 
 echo "cleanup generated instance keys"
 rm -vf /etc/ssh/ssh_host_*_key{,.pub}

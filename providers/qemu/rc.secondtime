@@ -1,5 +1,0 @@
-echo "relinking unique kernel for this instance"
-/usr/libexec/reorder_kernel
-
-echo "rebooting into final system"
-reboot

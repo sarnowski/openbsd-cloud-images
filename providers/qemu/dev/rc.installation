@@ -1,0 +1,4 @@
+echo "setting 'root' password to 'openbsd'!"
+password=$(encrypt -b a "openbsd")
+sed -i -e "s@^root:\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*:@root:${password}:@" /etc/master.passwd
+pwd_mkdb -s -u root /etc/master.passwd

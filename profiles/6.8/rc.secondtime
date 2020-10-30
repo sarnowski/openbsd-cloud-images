@@ -1,0 +1,13 @@
+echo "running cloud image provisioning"
+
+if [ -f /etc/rc.provision ]; then
+	echo "running custom provision script"
+	sh /etc/rc.provision || exit $?
+	rm -v /etc/rc.provision
+fi
+
+echo "relinking unique kernel for this instance"
+/usr/libexec/reorder_kernel
+
+echo "rebooting into final system"
+reboot

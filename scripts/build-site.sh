@@ -1,50 +1,56 @@
 #!/usr/bin/env bash
 
-if [ $# -ne 3 ]; then
-	echo "Usage:  $0 <site.tgz> <provider> <profile>" >&2
+if [ $# -lt 3 ]; then
+	echo "Usage:  $0 <site.tgz> <provider> <profile> [customization]" >&2
 	exit 1
 fi
 
 SITE_TARBALL=$1
 PROVIDER=$2
 PROFILE=$3
+CUSTOMIZATION=$4
 
 # make tarball filename absolute
 pushd $(dirname $SITE_TARBALL) >/dev/null; SITE_TARBALL=$(pwd)/$(basename $SITE_TARBALL); popd >/dev/null
 
-# reset to provider files
-cd $(dirname $0)/../providers/$PROVIDER
+# we want to go back here
+ROOT=$(pwd)
 
 # build temporary directory
 TARGETROOT=$(dirname $(dirname $SITE_TARBALL))
-VARIANT=$(basename $PROVIDER)
-
 SITEROOT=$TARGETROOT/site
 
 rm -rf $SITEROOT
 mkdir -p $SITEROOT
 
-cd ..
-echo "=> Creating site file structure..."
-cat $VARIANT/FILES | while read -r FILE OWNER PERM TARGET; do
+# overlay all different sources
+PROFILE_VERSION=$(dirname $PROFILE)
+PROVIDER_NAME=$(dirname $PROVIDER)
 
-	if [ "$FILE" = "-" ]; then
-		sudo mkdir -v $SITEROOT/$TARGET || exit $?
-	else
-		sudo cp -v $FILE $SITEROOT/$TARGET || exit $?
+for src in profiles/$PROFILE_VERSION profiles/$PROFILE providers/$PROVIDER_NAME providers/$PROVIDER $CUSTOMIZATION; do
+	echo "=> Applying $src"
+	cd $ROOT/$src
+
+	if [ -f FILES ]; then
+		echo "==> Executing FILES:"
+		cat FILES | while read -r FILE OWNER PERM TARGET; do
+
+			if [ "$FILE" = "-" ]; then
+				sudo mkdir -vp $SITEROOT/$TARGET || exit $?
+			else
+				sudo cp -v $FILE $SITEROOT/$TARGET || exit $?
+			fi
+
+			sudo chown -v $OWNER $SITEROOT/$TARGET || exit $?
+			sudo chmod -v $PERM $SITEROOT/$TARGET || exit $?
+		done
 	fi
 
-	sudo chown -v $OWNER $SITEROOT/$TARGET || exit $?
-	sudo chmod -v $PERM $SITEROOT/$TARGET || exit $?
+	if [ -x ./post-process-files ]; then
+		echo "==> Executing post-process-files:"
+		./post-process-files $SITEROOT $ROOT/$src $PROFILE $PROVIDER || exit $?
+	fi
 done
-
-if [ -x $VARIANT/post-build ]; then
-	echo "=> Executing $VARIANT/post-build:"
-	$VARIANT/post-build $SITEROOT $PROVIDER $PROFILE || exit $?
-elif [ -x ./post-build ]; then
-	echo "=> Executing post-build:"
-	./post-build $SITEROOT $PROVIDER $PROFILE || exit $?
-fi
 
 echo "=> Building site tarball: $SITE_TARBALL..."
 touch $SITE_TARBALL
