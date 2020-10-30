@@ -24,13 +24,21 @@ jobs:
           - 6.8/full
 
     steps:
-      - name: Safe strings
-        run: |
-          echo "::set-env name=safe_provider::$(echo $unsafe_provider | sed 'sX/X_Xg')"
-          echo "::set-env name=safe_profile::$(echo $unsafe_profile | sed 'sX/X_Xg')"
+      - name: Safe provider string
+        id: provider
+        uses: frabert/replace-string-action@v1.2
         with:
-          unsafe_provider: ${{ matrix.provider }}
-          unsafe_profile: ${{ matrix.profile }}
+          pattern: '(.+)\/(.+)'
+          string: ${{ mirror.provider }}
+          replace-with: '${1}_${2}'
+
+      - name: Safe profile string
+        id: profile
+        uses: frabert/replace-string-action@v1.2
+        with:
+          pattern: '(.+)\/(.+)'
+          string: ${{ mirror.profile }}
+          replace-with: '${1}_${2}'
 
       - name: Checkout code
         uses: actions/checkout@v2
@@ -39,7 +47,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: mirror
-          key: mirror-${{ safe_profile }}
+          key: mirror-${{ steps.profile.outputs.result }}
 
       - name: Install host tools
         run: sudo scripts/host-setup.sh
@@ -51,6 +59,6 @@ jobs:
       - name: Store artifact
         uses: 'actions/upload-artifact@v2'
         with:
-          name: openbsd-${{ safe_profile }}-${{ safe_provider }}
+          name: openbsd-${{ steps.profile.outputs.result }}-${{ steps.provider.outputs.results }}
           path: target/dev/${{ matrix.provider }}/${{ matrix.profile }}/openbsd.*
           if-no-files-found: error
