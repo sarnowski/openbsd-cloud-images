@@ -53,5 +53,13 @@ pkg_delete -v -I -x -c -a
 echo "preparing next boot"
 mv -v /etc/rc.secondtime /etc/rc.firsttime
 
+echo "cleanup generated instance keys"
+rm -vf /etc/ssh/ssh_host_*_key{,.pub}
+rm -vf /etc/isakmpd/private/local.key
+rm -vf /etc/isakmpd/local.pub
+rm -vf /etc/iked/private/local.key
+rm -vf /etc/iked/local.pub
+rm -vf /etc/soii.key
+
 echo "installation finished; rebooting into real system"
 reboot
