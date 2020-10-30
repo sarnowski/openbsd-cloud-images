@@ -55,10 +55,3 @@ jobs:
       - name: Make image
         run: make PROFILE=${{ matrix.profile }} PROVIDER=${{ matrix.provider }}
         timeout-minutes: 30
-
-      - name: Store artifact
-        uses: 'actions/upload-artifact@v2'
-        with:
-          name: openbsd-${{ steps.profile.outputs.result }}-${{ steps.provider.outputs.results }}
-          path: target/dev/${{ matrix.provider }}/${{ matrix.profile }}/openbsd.*
-          if-no-files-found: error
