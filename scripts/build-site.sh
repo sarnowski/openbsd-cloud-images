@@ -29,9 +29,9 @@ echo "=> Creating site file structure..."
 cat $VARIANT/FILES | while read -r FILE OWNER PERM TARGET; do
 
 	if [ "$FILE" = "-" ]; then
-		mkdir -v $SITEROOT/$TARGET || exit $?
+		sudo mkdir -v $SITEROOT/$TARGET || exit $?
 	else
-		cp -v $FILE $SITEROOT/$TARGET || exit $?
+		sudo cp -v $FILE $SITEROOT/$TARGET || exit $?
 	fi
 
 	sudo chown -v $OWNER $SITEROOT/$TARGET || exit $?
