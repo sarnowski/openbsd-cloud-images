@@ -172,20 +172,6 @@ ${FINAL_DISK}: ${BUILD_DISK} ${PROVIDER_NAME_DIR}/DISKFORMAT ${PROVIDER_NAME_DIR
 	@scripts/convert-disk.sh ${BUILD_DISK} ${FINAL_DISK} ${DISKFORMAT}; \
 	ls -lh ${FINAL_DISK}
 
-
-#
-# Publish Disk
-#
-
-.PHONY: publish-init
-publish-init:
-	@${PROVIDER_NAME_DIR}/publish-init.sh ${PROVIDER_VARIANT}
-
-.PHONY: publish
-publish: ${FINAL_DISK}
-	@${PROVIDER_NAME_DIR}/publish.sh ${PROVIDER_VARIANT} ${PROFILE} ${FINAL_DISK}
-
-
 #
 # Utility functions
 #

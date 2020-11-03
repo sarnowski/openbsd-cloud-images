@@ -5,19 +5,10 @@ if [ -d /vagrant ]; then
 	timedatectl set-timezone Europe/Berlin
 fi
 
-# azure repository
-curl -sL https://packages.microsoft.com/keys/microsoft.asc |
-    gpg --dearmor |
-    sudo tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
-
-AZ_REPO=$(lsb_release -cs)
-echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" |
-    sudo tee /etc/apt/sources.list.d/azure-cli.list
-
-# update packages
-apt-get update
-
 if [ -d /vagrant ]; then
+	# update packages
+	apt-get update
+
 	apt-get -o Dpkg::Options::=--force-confnew --allow-downgrades --allow-remove-essential --allow-change-held-packages -fuy dist-upgrade
 	apt-get -o Dpkg::Options::=--force-confnew --allow-downgrades --allow-remove-essential --allow-change-held-packages -fuy autoremove
 
@@ -32,9 +23,7 @@ apt-get -o Dpkg::Options::=--force-confnew --allow-downgrades --allow-remove-ess
 	qemu \
 	dnsmasq \
 	signify-openbsd \
-	webfs \
-	awscli \
-	azure-cli
+	webfs
 
 # deactivate webfs
 systemctl stop webfs
