@@ -50,7 +50,6 @@ sudo dnsmasq \
 	--dhcp-boot=auto_install \
 	--pid-file=$PWD/dnsmasq.pid \
 	--dhcp-leasefile=$PWD/dnsmasq.leases \
-	--log-facility=/dev/stdout \
 	&& DNSMASQ_STARTED=true
 
 echo "=> Starting webfsd (HTTP)..."
