@@ -16,6 +16,6 @@ qemu-system-x86_64 \
 	-m 2048 \
 	-no-fd-bootchk \
 	-drive if=virtio,file=$DISK,format=qcow2 \
-	-netdev user,id=guestnet \
+	-netdev user,id=guestnet,hostfwd=tcp::2222-:22 \
 	-device virtio-net,netdev=guestnet \
 	-nographic
