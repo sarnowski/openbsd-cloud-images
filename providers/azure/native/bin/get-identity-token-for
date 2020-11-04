@@ -19,6 +19,8 @@ _response=$(curl --silent --show-error \
 	--noproxy "*" \
 	"http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=$RESOURCE")
 
+_response=$(echo "$_response" | tr '\r\n' ' ')
+
 _token=$(echo "$_response" | jq --raw-output .access_token)
 
 if [ "$_token" = "null" ] || [ -z "$_token" ]; then
