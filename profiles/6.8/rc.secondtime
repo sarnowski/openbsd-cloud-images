@@ -1,5 +1,8 @@
 echo "running cloud image provisioning"
 
+echo "enabling sshd"
+rcctl enable sshd
+
 if [ -f /etc/rc.provision_provider ]; then
 	echo "running provider provision script"
 	sh /etc/rc.provision_provider || exit $?
