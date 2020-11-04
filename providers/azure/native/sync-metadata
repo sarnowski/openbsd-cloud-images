@@ -47,6 +47,14 @@ mv $_m.tmp $_m
 mv $_c.tmp $_c
 [ -f $_t ] && mv $_t.tmp $_t
 
+echo
+echo "metadata:"
+cat $_c
+echo
+echo "tags:"
+cat $_t
+echo
+
 echo "retrieving userdata"
 curl -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance/compute/customData?api-version=2020-06-01&format=text" > $_u.tmp
 mv $_u.tmp $_u
