@@ -37,8 +37,8 @@
 #  </Container>
 
 _goalstate=$(curl --silent --show-error -H 'x-ms-version: 2012-11-30' 'http://168.63.129.16/machine?comp=goalstate')
-_containerId=$(echo $_goalstate | grep -o -E '<ContainerId>(.+)</ContainerId>' | cut -d'>' -f2 | cut -d'<' -f1)
-_instanceId=$(echo $_goalstate | grep -o -E '<InstanceId>(.+)</InstanceId>' | cut -d'>' -f2 | cut -d'<' -f1)
+_containerId=$(echo "$_goalstate" | grep -o -E '<ContainerId>(.+)</ContainerId>' | cut -d'>' -f2 | cut -d'<' -f1)
+_instanceId=$(echo "$_goalstate" | grep -o -E '<InstanceId>(.+)</InstanceId>' | cut -d'>' -f2 | cut -d'<' -f1)
 
 
 # POST http://168.63.129.16/machine?comp=health

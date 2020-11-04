@@ -1,0 +1,30 @@
+#!/bin/sh
+
+#
+# https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token
+#
+# GET 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://management.azure.com/' HTTP/1.1 Metadata: true
+#
+
+if [ $# -ne 1 ]; then
+	echo "Usage:  $0 <resource-uri>" >&2
+	exit 1
+fi
+
+RESOURCE=$1
+
+_response=$(curl --silent --show-error \
+	-H 'Metadata: true' \
+	-H 'Content-type: application/json; charset=utf-8' \
+	--noproxy "*" \
+	"http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=$RESOURCE")
+
+_token=$(echo "$_response" | jq --raw-output .access_token)
+
+if [ "$_token" = "null" ] || [ -z "$_token" ]; then
+	echo "ERROR: No token available" >&2
+	echo "$_response" | jq . >&2
+	exit 2
+fi
+
+echo $_token
