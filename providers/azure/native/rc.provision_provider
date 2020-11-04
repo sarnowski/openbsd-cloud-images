@@ -1,4 +1,10 @@
 export PATH=$PATH:/usr/local/sbin:/usr/local/bin
 
-echo "synchronizing instance metadata"
+echo
+echo "ssh server key fingerprints:"
+for _key in /etc/ssh/ssh_host_*.pub; do
+	ssh-keygen -lf "$_key"
+done
+echo
+
 sync-metadata
