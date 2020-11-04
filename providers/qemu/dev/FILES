@@ -1,2 +1,2 @@
 -		0:0	0755	/etc
-rc.installation	0:0	0700	/etc/rc.installation
+rc.installation_provider	0:0	0700	/etc/rc.installation_provider

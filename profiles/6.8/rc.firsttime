@@ -9,6 +9,12 @@ syspatch
 echo "installing matching firmware"
 fw_update -v
 
+if [ -f /etc/rc.installation_provider ]; then
+	echo "running provider installation script"
+	sh /etc/rc.installation_provider || exit $?
+	rm /etc/rc.installation_provider
+fi
+
 if [ -f /etc/rc.installation ]; then
 	echo "running custom installation script"
 	sh /etc/rc.installation || exit $?

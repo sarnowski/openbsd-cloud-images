@@ -1,5 +1,11 @@
 echo "running cloud image provisioning"
 
+if [ -f /etc/rc.provision_provider ]; then
+	echo "running provider provision script"
+	sh /etc/rc.provision_provider || exit $?
+	rm -v /etc/rc.provision_provider
+fi
+
 if [ -f /etc/rc.provision ]; then
 	echo "running custom provision script"
 	sh /etc/rc.provision || exit $?

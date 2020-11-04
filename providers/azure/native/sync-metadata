@@ -1,0 +1,57 @@
+#!/bin/sh
+
+#
+# https://docs.microsoft.com/en-us/azure/virtual-machines/linux/instance-metadata-service
+# https://github.com/MicrosoftDocs/azure-docs/issues/30370
+# https://docs.microsoft.com/en-us/azure/virtual-machines/linux/no-agent
+#
+
+_m=/etc/azure/metadata.json
+_c=/etc/azure/metadata.conf
+_t=/etc/azure/tags.conf
+_u=/etc/userdata
+
+# fetch json doc and convert into simple config
+echo "synchronizing Azure metadata"
+mkdir -p $(dirname $_m)
+curl -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2020-06-01&format=json" > $_m.tmp
+
+_hostname=$(cat $_m.tmp | jq --raw-output .compute.name)
+_location=$(cat $_m.tmp | jq --raw-output .compute.location)
+_zone=$(cat $_m.tmp | jq --raw-output .compute.zone)
+_vmid=$(cat $_m.tmp | jq --raw-output .compute.vmId)
+_vmsize=$(cat $_m.tmp | jq --raw-output .compute.vmId)
+_resourcegroupname=$(cat $_m.tmp | jq --raw-output .compute.resourceGroupName)
+_resourceid=$(cat $_m.tmp | jq --raw-output .compute.resourceId)
+_tags=$(cat $_m.tmp | jq --raw-output .compute.tags)
+
+cat > $_c.tmp << EOF
+AZURE_HOSTNAME=$_hostname
+AZURE_LOCATION=$_location
+AZURE_ZONE=$_zone
+AZURE_VM_ID=$_vmid
+AZURE_VM_SIZE=$_vmsize
+AZURE_RESOURCE_GROUP_NAME=$_resourcegroupname
+AZURE_RESOURCE_ID=$_resourceid
+EOF
+
+rm -f $_t.tmp
+echo "$_tags" | sed 's/;/ g' | while read _kv; do
+	_k=$(echo $_kv | cut -d':' -f1)
+	_v=$(echo $_kv | cut -d':' -f2)
+
+	echo "$_k=$_v" >> $_t.tmp
+done
+
+mv $_m.tmp $_m
+mv $_c.tmp $_c
+[ -f $_t ] && mv $_t.tmp $_t
+
+echo "retrieving userdata"
+curl -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance/compute/customData?api-version=2020-06-01&format=text" > $_u.tmp
+mv $_u.tmp $_u
+
+echo "setting hostname to \"$_hostname\""
+echo $_hostname > /etc/myname
+hostname $_hostname
+

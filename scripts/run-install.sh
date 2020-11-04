@@ -121,7 +121,7 @@ fi
 if [ $GUEST_IF_CREATED = true ]; then
 	echo "=> Deleting VM interface..."
 	sudo ip link set $GUEST_IF down
-	sudo tunctl -d $GUEST_IF
+	sudo ip tuntap del dev $GUEST_IF
 fi
 
 if [ $HOST_IF_CREATED = true ]; then
