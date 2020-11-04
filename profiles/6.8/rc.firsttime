@@ -21,6 +21,12 @@ if [ -f /etc/rc.installation ]; then
 	rm /etc/rc.installation
 fi
 
+if [ -f /etc/rc.installation_provider_final ]; then
+	echo "running final provider installation script"
+	sh /etc/rc.installation_provider_final || exit $?
+	rm /etc/rc.installation_provider_final
+fi
+
 echo "enabling second stage rc"
 mv /etc/rc.secondtime /etc/rc.firsttime
 

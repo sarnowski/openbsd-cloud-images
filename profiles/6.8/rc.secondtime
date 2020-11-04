@@ -12,6 +12,12 @@ if [ -f /etc/rc.provision ]; then
 	rm -v /etc/rc.provision
 fi
 
+if [ -f /etc/rc.provision_provider_final ]; then
+	echo "running final provider provision script"
+	sh /etc/rc.provision_provider_final || exit $?
+	rm -v /etc/rc.provision_provider_final
+fi
+
 echo "relinking unique kernel for this instance"
 /usr/libexec/reorder_kernel
 

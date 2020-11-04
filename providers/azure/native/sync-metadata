@@ -36,7 +36,7 @@ AZURE_RESOURCE_ID=$_resourceid
 EOF
 
 rm -f $_t.tmp
-echo "$_tags" | sed 's/;/ g' | while read _kv; do
+echo "$_tags" | sed 's/;/ /g' | while read _kv; do
 	_k=$(echo $_kv | cut -d':' -f1)
 	_v=$(echo $_kv | cut -d':' -f2)
 

@@ -1,0 +1,87 @@
+#!/bin/sh
+
+#
+# https://docs.microsoft.com/en-us/azure/virtual-machines/linux/no-agent
+#
+
+# GET http://168.63.129.16/machine?comp=goalstate
+# x-ms-version: 2012-11-30
+#
+# <?xml version="1.0" encoding="utf-8"?>
+# <GoalState xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="goalstate10.xsd">
+#  <Version>2012-11-30</Version>
+#  <Incarnation>1</Incarnation>
+#  <Machine>
+#    <ExpectedState>Started</ExpectedState>
+#    <StopRolesDeadlineHint>300000</StopRolesDeadlineHint>
+#    <LBProbePorts>
+#      <Port>16001</Port>
+#    </LBProbePorts>
+#    <ExpectHealthReport>FALSE</ExpectHealthReport>
+#  </Machine>
+#  <Container>
+#    <ContainerId>f4108f73-5df9-4d58-8953-106ab050ab2f</ContainerId>
+#    <RoleInstanceList>
+#      <RoleInstance>
+#        <InstanceId>eaabfe75-d733-494e-ad0c-7464b1b0d279._tobitest2vm</InstanceId>
+#        <State>Started</State>
+#        <Configuration>
+#          <HostingEnvironmentConfig>http://168.63.129.16:80/machine/f4108f73-5df9-4d58-8953-106ab050ab2f/eaabfe75%2Dd733%2D494e%2Dad0c%2D7464b1b0d279.%5Ftobitest2vm?comp=config&amp;type=hostingEnvironmentConfig&amp;incarnation=1</HostingEnvironmentConfig>
+#          <SharedConfig>http://168.63.129.16:80/machine/f4108f73-5df9-4d58-8953-106ab050ab2f/eaabfe75%2Dd733%2D494e%2Dad0c%2D7464b1b0d279.%5Ftobitest2vm?comp=config&amp;type=sharedConfig&amp;incarnation=1</SharedConfig>
+#          <ExtensionsConfig>http://168.63.129.16:80/machine/f4108f73-5df9-4d58-8953-106ab050ab2f/eaabfe75%2Dd733%2D494e%2Dad0c%2D7464b1b0d279.%5Ftobitest2vm?comp=config&amp;type=extensionsConfig&amp;incarnation=1</ExtensionsConfig>
+#          <FullConfig>http://168.63.129.16:80/machine/f4108f73-5df9-4d58-8953-106ab050ab2f/eaabfe75%2Dd733%2D494e%2Dad0c%2D7464b1b0d279.%5Ftobitest2vm?comp=config&amp;type=fullConfig&amp;incarnation=1</FullConfig>
+#          <ConfigName>eaabfe75-d733-494e-ad0c-7464b1b0d279.0.eaabfe75-d733-494e-ad0c-7464b1b0d279.0._tobitest2vm.1.xml</ConfigName>
+#        </Configuration>
+#      </RoleInstance>
+#    </RoleInstanceList>
+#  </Container>
+
+_goalstate=$(curl --silent --show-error -H 'x-ms-version: 2012-11-30' 'http://168.63.129.16/machine?comp=goalstate')
+_containerId=$(echo $_goalstate | grep -o -E '<ContainerId>(.+)</ContainerId>' | cut -d'>' -f2 | cut -d'<' -f1)
+_instanceId=$(echo $_goalstate | grep -o -E '<InstanceId>(.+)</InstanceId>' | cut -d'>' -f2 | cut -d'<' -f1)
+
+
+# POST http://168.63.129.16/machine?comp=health
+# x-ms-version: 2012-11-30
+# Content-Type: text/xml;charset=utf-8
+# x-ms-agent-name: custom-provisioning
+#
+# <?xml version="1.0" encoding="utf-8"?>
+# <Health>
+#  <GoalStateIncarnation>1</GoalStateIncarnation>
+#  <Container>
+#    <ContainerId>$containerId</ContainerId>
+#    <RoleInstanceList>
+#      <Role>
+#        <InstanceId>$instanceId</InstanceId>
+#        <Health>
+#          <State>Ready</State>
+#        </Health>
+#      </Role>
+#    </RoleInstanceList>
+#  </Container>
+# </Health>
+
+_state="<?xml version=\"1.0\" encoding=\"utf-8\"?>
+<Health>
+  <GoalStateIncarnation>1</GoalStateIncarnation>
+  <Container>
+    <ContainerId>$_containerId</ContainerId>
+    <RoleInstanceList>
+      <Role>
+        <InstanceId>$_instanceId</InstanceId>
+        <Health>
+          <State>Ready</State>
+        </Health>
+      </Role>
+    </RoleInstanceList>
+  </Container>
+</Health>"
+
+curl --silent --show-error \
+	-X POST \
+	-H 'x-ms-version: 2012-11-30' \
+	-H 'Content-Type: text/xml;charset=utf-8' \
+	-H 'x-ms-agent-name: custom-provisioning' \
+	-d "$_state" \
+	'http://168.63.129.16/machine?comp=health'

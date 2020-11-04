@@ -1,4 +1,4 @@
 export PATH=$PATH:/usr/local/sbin:/usr/local/bin
 
-"synchronizing instance metadata"
-sync-metadata
+echo "reporting healthy boot"
+report-healthy
