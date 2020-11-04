@@ -14,7 +14,7 @@ _u=/etc/userdata
 # fetch json doc and convert into simple config
 echo "synchronizing Azure metadata"
 mkdir -p $(dirname $_m)
-curl -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2020-06-01&format=json" > $_m.tmp
+curl --silent --show-error -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2020-06-01&format=json" > $_m.tmp
 
 _hostname=$(cat $_m.tmp | jq --raw-output .compute.name)
 _location=$(cat $_m.tmp | jq --raw-output .compute.location)
@@ -45,18 +45,22 @@ done
 
 mv $_m.tmp $_m
 mv $_c.tmp $_c
-[ -f $_t ] && mv $_t.tmp $_t
+[ -f $_t.tmp ] && mv $_t.tmp $_t
 
 echo
 echo "metadata:"
 cat $_c
 echo
-echo "tags:"
-cat $_t
+if [ -f $_t ]; then
+	echo "tags:"
+	cat $_t
+else
+	echo "no tags attached"
+fi
 echo
 
 echo "retrieving userdata"
-curl -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance/compute/customData?api-version=2020-06-01&format=text" > $_u.tmp
+curl --silent --show-error -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance/compute/customData?api-version=2020-06-01&format=text" > $_u.tmp
 mv $_u.tmp $_u
 
 echo "setting hostname to \"$_hostname\""
