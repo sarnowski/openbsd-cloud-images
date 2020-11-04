@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [ $# -ne 1 ]; then
+	echo "Usage:  $0 <tag-name>" >&2
+	exit 1
+fi
+
+TAG_NAME=$1
+
+cat /etc/azure/metadata.json | jq --raw-output '.compute.tagsList[] | select(.name=="'$TAG_NAME'").value'

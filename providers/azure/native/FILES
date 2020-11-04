@@ -12,3 +12,5 @@ sbin/sync-metadata	0:0	0755	/usr/local/sbin/sync-metadata
 -		0:0	0755	/usr/local/bin
 bin/get-identity-token-for	0:0	0755	/usr/local/bin/get-identity-token-for
 bin/get-secret-from	0:0	0755	/usr/local/bin/get-secret-from
+bin/get-tag-value-of	0:0	0755	/usr/local/bin/get-tag-value-of
+bin/list-tags	0:0	0755	/usr/local/bin/list-tags

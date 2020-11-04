@@ -1,0 +1,3 @@
+#!/bin/sh
+
+cat /etc/azure/metadata.json | jq --raw-output '.compute.tagsList[].name'

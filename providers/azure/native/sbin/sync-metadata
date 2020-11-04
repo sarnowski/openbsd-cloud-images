@@ -8,7 +8,6 @@
 
 _m=/etc/azure/metadata.json
 _c=/etc/azure/metadata.conf
-_t=/etc/azure/tags.conf
 _u=/etc/userdata
 
 # fetch json doc and convert into simple config
@@ -24,6 +23,10 @@ _vmsize=$(cat $_m.tmp | jq --raw-output .compute.vmId)
 _resourcegroupname=$(cat $_m.tmp | jq --raw-output .compute.resourceGroupName)
 _resourceid=$(cat $_m.tmp | jq --raw-output .compute.resourceId)
 _tags=$(cat $_m.tmp | jq --raw-output .compute.tags)
+_privateIp=$(cat $_m.tmp | jq --raw-output '.network.interface[0].ipv4.ipAddress[0].privateIpAddress')
+_publicIp=$(cat $_m.tmp | jq --raw-output '.network.interface[0].ipv4.ipAddress[0].publicIpAddress')
+
+[ "$_publicIp" = "null" ] && _publicIp=""
 
 cat > $_c.tmp << EOF
 AZURE_HOSTNAME=$_hostname
@@ -33,37 +36,28 @@ AZURE_VM_ID=$_vmid
 AZURE_VM_SIZE=$_vmsize
 AZURE_RESOURCE_GROUP_NAME=$_resourcegroupname
 AZURE_RESOURCE_ID=$_resourceid
+AZURE_PRIVATE_IP=$_privateIp
+AZURE_PUBLIC_IP=$_publicIp
 EOF
-
-rm -f $_t.tmp
-echo "$_tags" | sed 's/;/ /g' | while read _kv; do
-	_k=$(echo $_kv | cut -d':' -f1)
-	_v=$(echo $_kv | cut -d':' -f2)
-
-	echo "$_k=$_v" >> $_t.tmp
-done
 
 mv $_m.tmp $_m
 mv $_c.tmp $_c
-[ -f $_t.tmp ] && mv $_t.tmp $_t
 
 echo
 echo "metadata:"
 cat $_c
 echo
-if [ -f $_t ]; then
-	echo "tags:"
-	cat $_t
-else
-	echo "no tags attached"
-fi
+echo "tags:"
+for _tag in $(list-tags); do
+	echo "$_tag: $(get-tag-value-of $_tag)"
+done
 echo
-
-echo "retrieving userdata"
-curl --silent --show-error -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance/compute/customData?api-version=2020-06-01&format=text" > $_u.tmp
-mv $_u.tmp $_u
 
 echo "setting hostname to \"$_hostname\""
 echo $_hostname > /etc/myname
 hostname $_hostname
 
+if [ -n "$_publicIp" ]; then
+	echo "adding public IP $_publicIp to hvn0"
+	ifconfig hvn0 inet alias $_publicIp netmask 255.255.255.255
+fi
