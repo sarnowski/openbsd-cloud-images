@@ -6,18 +6,24 @@
 # GET 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://management.azure.com/' HTTP/1.1 Metadata: true
 #
 
-if [ $# -ne 1 ]; then
-	echo "Usage:  $0 <resource-uri>" >&2
+if [ $# -lt 1 ] || [ $# -gt 2 ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+	echo "Usage:  $0 <resource-uri> [client-id]" >&2
 	exit 1
 fi
 
 RESOURCE=$1
+CLIENT_ID=$2
+
+_client_id_ext=""
+if [ -n "$CLIENT_ID" ]; then
+	_client_id_ext="&client_id=$CLIENT_ID"
+fi
 
 _response=$(curl --silent --show-error \
 	-H 'Metadata: true' \
 	-H 'Content-type: application/json; charset=utf-8' \
 	--noproxy "*" \
-	"http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=$RESOURCE")
+	"http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=$RESOURCE$_client_id_ext")
 
 _response=$(echo "$_response" | tr '\r\n' ' ')
 
@@ -25,7 +31,7 @@ _token=$(echo "$_response" | jq --raw-output .access_token)
 
 if [ "$_token" = "null" ] || [ -z "$_token" ]; then
 	echo "ERROR: No token available" >&2
-	echo "$_response" | jq . >&2
+	echo "$_response" | jq -M . >&2
 	exit 2
 fi
 
