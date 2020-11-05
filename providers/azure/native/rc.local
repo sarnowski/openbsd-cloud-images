@@ -1,3 +1,12 @@
 export PATH=$PATH:/usr/local/sbin:/usr/local/bin
 
 sync-metadata
+
+if [ -f /etc/rc.local_custom ]; then
+	echo "running rc.local_custom"
+	sh /etc/rc.local_custom || exit $?
+fi
+
+echo "reporting healthy boot"
+report-healthy
+

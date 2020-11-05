@@ -1,4 +1,0 @@
-export PATH=$PATH:/usr/local/sbin:/usr/local/bin
-
-echo "reporting healthy boot"
-report-healthy
