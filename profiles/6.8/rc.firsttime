@@ -30,6 +30,9 @@ if [ -f /etc/rc.installation_provider_final ]; then
 	rm /etc/rc.installation_provider_final
 fi
 
+echo "update manual page index"
+makewhatis /usr/share/man
+
 echo "enabling second stage rc"
 mv /etc/rc.secondtime /etc/rc.firsttime
 
