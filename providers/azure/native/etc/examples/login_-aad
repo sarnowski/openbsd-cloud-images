@@ -1,0 +1,11 @@
+# Azure Active Directory Login
+#
+
+# The tenant ID of your Azure AD
+TENANT_ID=
+
+# The client ID of the app registration for the device code login
+CLIENT_ID=
+
+# Groups to join when a user logs in first time
+USER_GROUPS=users,wheel

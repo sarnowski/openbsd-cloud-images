@@ -1,0 +1,234 @@
+#!/bin/sh
+
+# required for curl and jq to be available
+PATH=$PATH:/usr/local/bin
+
+log() {
+	local _target=$1
+	shift
+	logger -p $_target "$@"
+}
+
+debug() {
+	# note: uncomment for more verbose logs
+	#log auth.info "login_-aad: $@"
+}
+
+info() {
+	log auth.info "login_-aad: $@"
+}
+
+panic() {
+	log auth.err "login_-aad: panic: $@"
+
+	notify_login "reject silent"
+	exit 1
+}
+
+success() {
+	username=$1
+
+	info "$username logged in."
+
+	notify_login "authorize secure"
+	exit 0
+}
+
+failed() {
+	username=$1
+	shift
+	reason="$@"
+
+	info "$username failed to log in: $reason"
+
+	notify_login "reject"
+	exit 1
+}
+
+notify_login() {
+	echo "$@" >&3
+}
+
+
+# load configurations
+[ ! -f /etc/login_-aad ] && panic "no configuration file found"
+. /etc/login_-aad
+
+[ -z "$TENANT_ID" ] && panic "TENANT_ID is not configured"
+[ -z "$CLIENT_ID" ] && panic "CLIENT_ID is not configured"
+[ -z "$USER_GROUPS" ] && panic "USER_GROUPS is not configured"
+
+# parse arguments
+login_service="login"
+login_login="no"
+while [ $# -gt 0 ]; do
+	case $1 in
+		-v)
+			key=$(echo "$2" | cut -d'=' -f1)
+			value=$(echo "$2" | cut -d'=' -f2-)
+			case "$key" in
+				login)
+					login_login=$value
+					;;
+				invokinguser)
+					# we don't care
+					;;
+				*)
+					debug "UNKNOWN kv: $key = $value"
+					;;
+			esac
+			shift 2
+			;;
+		-s)
+			login_service=$2
+			shift 2
+			;;
+		--)
+			login_username=$2
+			login_class=$3
+			shift 3
+			;;
+
+	esac
+done
+
+if [ "$login_service" = "login" ] || [ "$login_service" = "challenge" ]; then
+
+	# Device Code Flow
+	# https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-device-code
+
+	# Step 1: initialize flow, retrieve device and user code
+	flow_data=$(curl --silent --show-error \
+		-X POST \
+		-H 'Content-Type: application/x-www-form-urlencoded' \
+		-d "scope=User.Read&client_id=$CLIENT_ID" \
+		https://login.microsoftonline.com/$TENANT_ID/oauth2/v2.0/devicecode \
+		2>&1)
+
+	[ $? -ne 0 ] && panic "failed to connect to Azure: $flow_data"
+
+	flow_data=$(echo "$flow_data" | tr '\r\n' ' ')
+
+	flow_error=$(echo "$flow_data" | jq --raw-output .error)
+	flow_error_description=$(echo "$flow_data" | jq --raw-output .error_description)
+
+	[ "$flow_error" != "null" ] && panic "failed to initialize flow: $flow_error: $flow_error_description"
+
+	flow_user_code=$(echo "$flow_data" | jq --raw-output .user_code)
+	flow_device_code=$(echo "$flow_data" | jq --raw-output .device_code)
+	flow_verification_uri=$(echo "$flow_data" | jq --raw-output .verification_uri)
+	flow_expires_in=$(echo "$flow_data" | jq --raw-output .expires_in)
+	flow_interval=$(echo "$flow_data" | jq --raw-output .interval)
+	flow_message=$(echo "$flow_data" | jq --raw-output .message)
+
+	[ "$flow_user_code" = "null" ] && panic "unexpected result from initialization: $flow_data"
+
+	t=/tmp/login_-aad-$flow_user_code
+	rm -f $flow_user_code
+	touch $flow_user_code
+	chmod 0600 $flow_user_code
+
+	echo "flow_user_code=$flow_user_code" >> $t
+	echo "flow_device_code=$flow_device_code" >> $t
+	echo "flow_expires_in=$flow_expires_in" >> $t
+
+	# note: having a line break in here is important for the later 'read' command to stop reading at the line break
+	#       else its blocked since it does not recognize the \0 byte.
+	# note: position 2 of the code is important for later to read it back
+	message="Enter $flow_user_code into https://microsoft.com/devicelogin and sign in.\\\\nAfter signing in, press ENTER here. "
+
+	notify_login "value challenge $message"
+	notify_login "reject challenge"
+	info "started device code challenge for $login_username"
+	exit 0
+fi
+
+
+if [ "$login_service" = "response" ]; then
+	# pick up the flow
+	debug "reading message from challenge..."
+	read -r flow_message <&3
+
+	debug "message: $flow_message"
+
+	flow_user_code=$(echo "$flow_message" | cut -d' ' -f2)
+	debug "picking up flow $flow_user_code"
+
+	[ -z "$flow_user_code" ] && panic "challenge data is missing from message: $flow_message"
+
+	t=/tmp/login_-aad-$flow_user_code
+	[ ! -f $t ] && panic "login failed due to internal error: given flow not found"
+
+	. $t
+	rm -f $t
+
+	debug "user code: $flow_user_code"
+	debug "device code: $flow_device_code"
+
+	# Step 2: verify status
+	response=$(curl --silent --show-error \
+		-X POST \
+		-H 'Content-Type: application/x-www-form-urlencoded' \
+		-d "grant_type=urn:ietf:params:oauth:grant-type:device_code&client_id=$CLIENT_ID&device_code=$flow_device_code" \
+		https://login.microsoftonline.com/$TENANT_ID/oauth2/v2.0/token \
+		2>&1)
+
+	[ $? -ne 0 ] && panic "login failed due to internal error: invalid code response: $response"
+
+	response=$(echo "$response" | tr '\r\n' ' ')
+
+	response_error=$(echo "$response" | jq --raw-output .error)
+	response_error_description=$(echo "$response" | jq --raw-output .error_description)
+
+	if [ "$response_error" != "null" ]; then
+		case "$response_error" in
+			authorization_pending)
+				failed "$login_username" "user did not sign in before pressing enter"
+				;;
+			authorization_declined)
+				failed "$login_username" "user aborted the sign in"
+				;;
+			bad_verification_code)
+				panic "login failed due to internal error: $response_error: $response_error_description"
+				;;
+			expired_token)
+				failed "$login_username" "user code expired"
+				;;
+			*)
+				panic "login failed due to internal error: $response_error: $response_error_description"
+				;;
+		esac
+	fi
+
+	# success!
+	response_token_type=$(echo "$response" | jq --raw-output .token_type)
+	response_scope=$(echo "$response" | jq --raw-output .scope)
+	response_expires_in=$(echo "$response" | jq --raw-output .expires_in)
+	response_access_token=$(echo "$response" | jq --raw-output .access_token)
+
+	[ "$response_access_token" = "null" ] && panic "login failed due to internal error: no access token found: $response"
+
+	[ -z "$response_access_token" ] && panic "no access token in response: $response"
+
+	# step 3: identify user
+	jwt_body=$(echo "$response_access_token" | cut -d'.' -f2)
+	jwt_body="$jwt_body=="  # hack to provide possible filling bytes to base64 command which are ignored with -n if superflous
+	jwt_body=$(echo "$jwt_body" | base64 -n -d)
+
+	jwt_upn=$(echo "$jwt_body" | jq --raw-output .upn)
+
+	username=$(echo "$jwt_upn" | tr '@' '_')
+
+	[ "$username" != "NOUSER" ] && [ "$username" != "$login_username" ] && failed "$login_username" "signed in username ($username) does not match requested user name $login_username"
+
+	# step 4: grant access
+	id "$username" >/dev/null 2>&1
+	if [ $? -ne 0 ]; then
+		useradd -m -G "$USER_GROUPS" "$username"
+		echo
+	fi
+
+	success "$username"
+fi
+
+panic "should have never reached this point"
