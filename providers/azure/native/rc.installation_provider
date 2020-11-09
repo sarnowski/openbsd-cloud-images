@@ -1,3 +1,3 @@
-pkgs="curl jq"
+pkgs="curl jq base64"
 echo "installing software: $pkgs"
 pkg_add $pkgs
