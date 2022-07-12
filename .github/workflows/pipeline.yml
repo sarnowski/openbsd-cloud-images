@@ -20,6 +20,7 @@ jobs:
           - qemu/dev
           - azure/default
           - azure/minimal
+          - azure/native
         profile:
           # previous version
           - 7.0/minimal
