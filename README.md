@@ -90,6 +90,15 @@ Set the mirror with the `MIRROR` variable:
 
     make MIRROR=https://ftp.openbsd.org/pub/OpenBSD/
 
+## Local Execution
+
+To run the produced qemu images locally, you can use the provided scripts.
+For example:
+
+    ./scripts/run-disk.sh target/dev/qemu/dev/7.1/minimal/disk.qcow2
+
+If you are using the default `qemu/dev` provider, the `root` password will be `openbsd`.
+
 ## License
 
 Copyright (c) 2020-2022 Tobias Sarnowski <tobias@sarnowski.io>
