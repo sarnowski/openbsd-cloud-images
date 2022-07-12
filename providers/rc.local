@@ -1,7 +1,5 @@
 export PATH=$PATH:/usr/local/sbin:/usr/local/bin
 
-sync-metadata
-
 echo "SSH server fingerprints:"
 find /etc/ssh/ -name 'ssh_host_*.pub' -exec ssh-keygen -l -f '{}' ';'
 find /etc/ssh/ -name 'ssh_host_*.pub' -exec ssh-keygen -l -E md5 -f '{}' ';'
@@ -11,7 +9,4 @@ if [ -f /etc/rc.local_custom ]; then
 	echo "running rc.local_custom"
 	sh /etc/rc.local_custom || exit $?
 fi
-
-echo "reporting healthy boot"
-report-healthy
 

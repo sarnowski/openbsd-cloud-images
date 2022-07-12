@@ -69,11 +69,7 @@ rm -fv disk.qcow2
 qemu-img create -f qcow2 disk.qcow2 ${DISKSIZE}G
 
 echo "=> Executing stage 1: auto installation:"
-ACCEL_OPTION=
-sudo kvm-ok && ACCEL_OPTION=--enable-kvm
-
 qemu-system-x86_64 \
-	$ACCEL_OPTION \
 	-smp cores=2 \
 	-m 2048 \
 	-drive if=virtio,file=disk.qcow2,format=qcow2 \
@@ -93,7 +89,6 @@ else
 	echo "=> Executing stage 2: firsttime installation:"
 	# second stage, run rc.firsttime in real system
 	qemu-system-x86_64 \
-		$ACCEL_OPTION \
 		-smp cores=2 \
 		-m 2048 \
 		-no-fd-bootchk \

@@ -7,15 +7,11 @@ fi
 
 DISK=$1
 
-ACCEL_OPTION=
-sudo kvm-ok && ACCEL_OPTION=--enable-kvm
-
 qemu-system-x86_64 \
-	$ACCEL_OPTION \
 	-smp cores=2 \
 	-m 2048 \
 	-no-fd-bootchk \
-	-drive if=virtio,file=$DISK,format=qcow2 \
+	-drive if=virtio,file=$DISK \
 	-netdev user,id=guestnet,hostfwd=tcp::2222-:22 \
 	-device virtio-net,netdev=guestnet \
 	-nographic
