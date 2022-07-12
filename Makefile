@@ -7,7 +7,7 @@
 # Arguments, override as necessary
 #
 PROVIDER ?= qemu/dev
-PROFILE ?= 6.8/minimal
+PROFILE ?= 7.1/minimal
 MIRROR ?= https://cdn.openbsd.org/pub/OpenBSD/
 DISKSIZE ?= 10
 BUILD_ID ?= dev
