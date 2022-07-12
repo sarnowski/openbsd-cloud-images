@@ -1,5 +1,10 @@
 echo "running cloud image provisioning"
 
+echo "applying all available patches"
+while [ "$(syspatch -c | wc -l)" -gt 0 ]; do
+	syspatch
+done
+
 echo "installing matching firmware"
 fw_update -v
 
