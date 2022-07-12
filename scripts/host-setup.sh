@@ -20,7 +20,8 @@ fi
 # install required packages
 apt-get -o Dpkg::Options::=--force-confnew --allow-downgrades --allow-remove-essential --allow-change-held-packages -fuy install \
 	vim \
-	qemu \
+	qemu-system \
+	qemu-utils \
 	dnsmasq \
 	signify-openbsd \
 	webfs

@@ -17,6 +17,7 @@ This framework provides a Vagrantfile with a defined host system to build the im
 
     $ vagrant up
     $ vagrant ssh
+    $ cd /vagrant
 
 ## Usage
 
@@ -52,6 +53,15 @@ Set the profile with the `PROFILE` variable:
 
     make PROFILE=6.8/minimal
 
+### New profile
+
+OpenBSD releases new versions every half a year.
+The `profiles/clone-version.sh` script can be used to easily clone an old version for the new one.
+In almost all cases, this will just work as OpenBSD generally has a quite stable ecosystem.
+
+Once a new profile is finished, don't forget to update `.github/workflows/pipeline.yml` to build with the new one.
+Also change the default profile in the `Makefile` to the new version.
+
 ## Provider
 
 Providers define cloud specific configurations of the OpenBSD system.
@@ -82,7 +92,7 @@ Set the mirror with the `MIRROR` variable:
 
 ## License
 
-Copyright (c) 2020 Tobias Sarnowski <tobias@sarnowski.io>
+Copyright (c) 2020-2022 Tobias Sarnowski <tobias@sarnowski.io>
 
 Permission to use, copy, modify, and distribute this software for any
 purpose with or without fee is hereby granted, provided that the above

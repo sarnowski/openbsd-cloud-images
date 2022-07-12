@@ -4,7 +4,7 @@ VM_CORES=4
 Vagrant.configure('2') do |config|
 	config.vagrant.plugins = ["vagrant-vbguest"]
 
-	config.vm.box = 'ubuntu/bionic64'
+	config.vm.box = 'ubuntu/focal64'
 
 	config.vm.provider :virtualbox do |vb, override|
 		vb.memory = VM_MEMORY

@@ -21,9 +21,9 @@ jobs:
           - azure/default
           - azure/minimal
         profile:
-          - 6.8/minimal
-          - 6.8/default
-          - 6.8/full
+          - 7.1/minimal
+          - 7.1/default
+          - 7.1/full
 
     steps:
       - name: Checkout code
@@ -33,16 +33,16 @@ jobs:
         uses: actions/cache@v2
         with:
           path: mirror
-          key: mirror-6.8
+          key: mirror-${{ matrix.profile }}
 
       - name: Install host tools
         run: sudo scripts/host-setup.sh
 
       - name: Sync mirror files
-        run: make mirror-sync
+        run: make PROFILE=${{ matrix.profile }} mirror-sync
 
       - name: Check mirror files
-        run: make mirror-check
+        run: make PROFILE=${{ matrix.profile }} mirror-check
 
       - name: Make image
         run: make PROFILE=${{ matrix.profile }} PROVIDER=${{ matrix.provider }}
