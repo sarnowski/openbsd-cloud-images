@@ -3,10 +3,15 @@
 ![OpenBSD Cloud Images Status](https://github.com/sarnowski/openbsd-cloud-images/workflows/Cloud-Images/badge.svg?branch=main)
 
 This repository contains a build system to create OpenBSD cloud images on Linux machines.
-Most automated build systems provide great support for Linux but mostly not for OpenBSD.
-Until this changes, the build framework will focus on Linux to allow everyone to automatically build OpenBSD images for their servers.
+The purpose of this approach is to build either generic OpenBSD VM images or Golden Images for your cloud deployment in your devops pipeline.
 
-The following providers are supported:
+Most automated build systems provide great support for Linux but mostly not for OpenBSD.
+Until this changes, this build framework will focus on Linux to allow everyone to automatically build OpenBSD images for their servers.
+
+OpenBSD officially only supports installation via the provided installation media.
+This framework uses a qemu-based VM approach for the installation process to adhere to that guideline and to minimize surprises.
+
+The following VM providers are supported out-of-the-box:
 
   * azure
   * qemu / kvm
@@ -65,6 +70,13 @@ Also change the default profile in the `Makefile` to the new version.
 ## Provider
 
 Providers define cloud specific configurations of the OpenBSD system.
+There are the following profiles defined:
+
+  * `azure/default`: comes with the Microsoft Azure agent for cloud-init and all basic cloud features, this is what you mostly expect from cloud images.
+  * `azure/minimal`: nothing cloud specific at all, Azure will not know when your VM is even readily booted
+  * `azure/native`: does not come with the bloated Microsoft Agent but with an own simple set of lightweight tools for painless integration. Read more in the [providers/azure/native/README.md](providers/azure/native/README.md).
+  * `qemu/default`: nothing cloud specific at all
+  * `qemu/dev`: same as the `default` but sets the `root` user password to `openbsd`. Meant primarily for local development purposes.
 
 List all available providers:
 
