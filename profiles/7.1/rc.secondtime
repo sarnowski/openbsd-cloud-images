@@ -1,5 +1,8 @@
 echo "running cloud image provisioning"
 
+echo "installing matching firmware"
+fw_update -v
+
 echo "enabling sshd"
 rcctl enable sshd
 

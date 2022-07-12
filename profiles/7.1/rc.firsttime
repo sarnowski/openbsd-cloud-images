@@ -4,7 +4,9 @@ echo "disabling sndiod"
 rcctl disable sndiod
 
 echo "applying all available patches"
-syspatch
+while [ "$(syspatch -c | wc -l)" -gt 0 ]; do
+	syspatch
+done
 
 echo "installing matching firmware"
 fw_update -v
