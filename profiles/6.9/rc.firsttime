@@ -1,0 +1,48 @@
+echo "running cloud image installation"
+
+echo "disabling sndiod"
+rcctl disable sndiod
+
+echo "applying all available patches"
+syspatch
+
+echo "installing matching firmware"
+fw_update -v
+
+echo "disabling sshd"
+rcctl disable sshd
+
+if [ -f /etc/rc.installation_provider ]; then
+	echo "running provider installation script"
+	sh /etc/rc.installation_provider || exit $?
+	rm /etc/rc.installation_provider
+fi
+
+if [ -f /etc/rc.installation ]; then
+	echo "running custom installation script"
+	sh /etc/rc.installation || exit $?
+	rm /etc/rc.installation
+fi
+
+if [ -f /etc/rc.installation_provider_final ]; then
+	echo "running final provider installation script"
+	sh /etc/rc.installation_provider_final || exit $?
+	rm /etc/rc.installation_provider_final
+fi
+
+echo "update manual page index"
+makewhatis /usr/share/man
+
+echo "enabling second stage rc"
+mv /etc/rc.secondtime /etc/rc.firsttime
+
+echo "cleanup generated instance keys"
+rm -vf /etc/ssh/ssh_host_*_key{,.pub}
+rm -vf /etc/isakmpd/private/local.key
+rm -vf /etc/isakmpd/local.pub
+rm -vf /etc/iked/private/local.key
+rm -vf /etc/iked/local.pub
+rm -vf /etc/soii.key
+
+echo "installation finished; rebooting into real system"
+reboot

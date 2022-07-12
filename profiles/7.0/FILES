@@ -1,0 +1,4 @@
+-		0:0	0755	/etc
+rc.firsttime	0:0	0700	/etc/rc.firsttime
+rc.secondtime	0:0	0700	/etc/rc.secondtime
+installurl	0:0	0644	/etc/installurl
