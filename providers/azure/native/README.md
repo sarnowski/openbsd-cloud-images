@@ -2,6 +2,18 @@
 
 This provider configuration does not come with the official Microsoft Azure agent but adds its own lightweight tools for basic cloud integration.
 Those tools allow you to build simple scripts that can work with all the metadata of the virtual machine. There are helpers that give you easy access to the Azure APIs via managed identities as well as simple commands to retrieve secrets and credentials from Azure Keyvault.
+On top of those tools, this provider configuration also comes with an Azure AD native SSH login integration that leverages your Azure AD SSO for user access.
+
+### login_-aad
+
+The `login_-aad` tool provides Azure AD SSO integration for your OpenBSD users.
+To use it, you can use the example configurations from [providers/azure/native/etc/examples](./examples/).
+
+The `/etc/login_-aad` contains the basic Azure AD configuration about the tenant ID as well as the App Registration's client ID to use for the device code login.
+
+The `/etc/login.conf` will need to allow the `-aad` mechanism and probably even forbid any other. The example `login.conf` has a comment about it.
+
+The `/etc/ssh/sshd_config` then has to disable traditional public-key and password authentication and switch to `bsdauth` to use the OpenBSD native login mechanism. You can also find an example configuration file in the directory.
 
 ### get-identity-token-for
 
